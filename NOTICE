@@ -1,0 +1,16 @@
+Bubble Matrix Map
+Copyright 2026 Nagi Inaba
+
+This product includes Apache ECharts 6.1.0.
+Copyright 2017-2026 The Apache Software Foundation.
+Apache ECharts notices and the bundled d3 BSD-3-Clause license are reproduced
+in THIRD_PARTY_NOTICES and licenses/.
+
+This product includes ExcelJS 4.4.0.
+Copyright (c) 2014-2019 Guyon Roche.
+Its MIT license is reproduced in licenses/LICENSE-exceljs.
+ExcelJS and its dependency graph are installed as separate npm packages and
+are not copied into the single-file CLI bundle.
+
+The complete dependency inventory and license texts for code copied into the
+single-file CLI bundle are reproduced in licenses/BUNDLED_NPM_LICENSES.txt.

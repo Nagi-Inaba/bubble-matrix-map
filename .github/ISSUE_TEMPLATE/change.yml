@@ -1,0 +1,52 @@
+name: 変更提案または不具合報告
+description: 再現可能な不具合、機能変更、文書修正を提案します。
+title: ""
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        機密情報、実データ、絶対パス、脆弱性の詳細は入力しないでください。
+        脆弱性はSECURITY.mdの非公開報告手順を使用してください。
+  - type: textarea
+    id: purpose
+    attributes:
+      label: 目的と利用者
+      description: 何を改善し、誰が利用するかを記載してください。
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: 対象範囲
+      description: 変更する機能、文書、契約を記載してください。
+    validations:
+      required: true
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: 対象外
+      description: この提案では変更しない事項を記載してください。
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 受入条件
+      description: 完了を判断できるテストまたは観測結果を記載してください。
+    validations:
+      required: true
+  - type: textarea
+    id: contracts
+    attributes:
+      label: 契約とセキュリティへの影響
+      description: CLI、Schema、出力、ファイル境界への影響を記載してください。影響がない場合は「なし」と記載してください。
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 再現手順または根拠
+      description: 架空の最小データ、実行コマンド、version、OSを記載してください。
+    validations:
+      required: true

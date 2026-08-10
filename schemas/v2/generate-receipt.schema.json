@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:bubble-matrix-map:schema:generate-receipt:2",
+  "title": "Generate receipt v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "ok", "command", "input", "config", "output", "result", "outputRoot", "width", "height", "totalRows", "scopedRows", "includedRows", "pieExcludedRows", "cells", "summary", "warnings"],
+  "properties": {
+    "schemaVersion": { "const": 2 },
+    "ok": { "const": true },
+    "command": { "const": "generate" },
+    "input": { "type": "string" },
+    "config": { "type": ["string", "null"] },
+    "output": { "type": "string" },
+    "result": { "type": ["string", "null"] },
+    "outputRoot": { "type": "string" },
+    "width": { "type": "integer", "minimum": 1 },
+    "height": { "type": "integer", "minimum": 1 },
+    "totalRows": { "type": "integer", "minimum": 0 },
+    "scopedRows": { "type": "integer", "minimum": 0 },
+    "includedRows": { "type": "integer", "minimum": 0 },
+    "pieExcludedRows": { "type": "integer", "minimum": 0 },
+    "cells": { "type": "integer", "minimum": 0 },
+    "summary": { "type": "string" },
+    "warnings": {
+      "type": "array",
+      "items": { "$ref": "urn:bubble-matrix-map:schema:notice:2" }
+    },
+    "artifactId": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "disposition": { "enum": ["created", "reused", "replaced"] },
+    "manifest": { "type": "string", "minLength": 1 }
+  }
+}

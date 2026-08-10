@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:bubble-matrix-map:schema:error-receipt:2",
+  "title": "CLI error receipt v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "ok", "code", "message", "reason", "retryable"],
+  "properties": {
+    "schemaVersion": { "const": 2 },
+    "ok": { "const": false },
+    "code": {
+      "enum": [
+        "ARTIFACT_CONFLICT",
+        "DUPLICATE_ARGUMENT",
+        "INPUT_ERROR",
+        "INTERNAL_ERROR",
+        "INVALID_CONFIG",
+        "INVALID_CONFIG_PATH",
+        "INVALID_CONFIG_VALUE",
+        "INVALID_OUTPUT_PATH",
+        "INVALID_RESULT_PATH",
+        "LABEL_TOO_LONG",
+        "MISSING_ARGUMENT",
+        "OUTPUT_ERROR",
+        "OUTPUT_BUSY",
+        "OUTPUT_EXISTS",
+        "OUTPUT_OUTSIDE_ROOT",
+        "OUTPUT_PATH_CONFLICT",
+        "SVG_DIMENSION_LIMIT",
+        "UNKNOWN_ARGUMENT",
+        "UNKNOWN_COLUMN",
+        "UNKNOWN_COMMAND",
+        "UNKNOWN_CONFIG_KEY",
+        "UNSAFE_OUTPUT_TARGET",
+        "UNSAFE_XLSX"
+      ]
+    },
+    "message": { "type": "string", "minLength": 1 },
+    "reason": {
+      "enum": [
+        "artifact_conflict",
+        "duplicate_argument",
+        "input_error",
+        "internal_error",
+        "invalid_config",
+        "invalid_config_path",
+        "invalid_config_value",
+        "invalid_output_path",
+        "invalid_result_path",
+        "label_too_long",
+        "missing_argument",
+        "output_error",
+        "output_busy",
+        "output_exists",
+        "output_outside_root",
+        "output_path_conflict",
+        "svg_dimension_limit",
+        "unknown_argument",
+        "unknown_column",
+        "unknown_command",
+        "unknown_config_key",
+        "unsafe_output_target",
+        "unsafe_xlsx",
+        "config_empty",
+        "config_invalid_json",
+        "config_read_error",
+        "artifact_id_mismatch",
+        "artifact_missing",
+        "digest_mismatch",
+        "file_set_mismatch",
+        "lock_create_failed",
+        "lock_release_failed",
+        "manifest_invalid",
+        "manifest_missing",
+        "output_prepare_failed",
+        "required_argument_missing",
+        "stdin_empty",
+        "stdin_invalid_json",
+        "stdin_read_error",
+        "stdin_too_large",
+        "unclassified_internal_error",
+        "unknown_contract_argument",
+        "unsupported_config_extension"
+      ]
+    },
+    "retryable": { "type": "boolean" },
+    "field": { "type": "string", "minLength": 1 },
+    "allowedValues": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string" }
+    },
+    "details": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "minimum": { "type": "number" },
+        "maximum": { "type": "number" },
+        "maxBytes": { "type": "integer", "minimum": 0 },
+        "actual": {
+          "anyOf": [
+            { "type": "number" },
+            { "type": "boolean" },
+            { "type": "null" }
+          ]
+        },
+        "count": { "type": "integer", "minimum": 0 },
+        "bytes": { "type": "integer", "minimum": 0 },
+        "unit": { "type": "string" }
+      }
+    }
+  }
+}

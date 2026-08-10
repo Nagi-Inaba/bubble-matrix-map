@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:bubble-matrix-map:schema:notice:2",
+  "title": "Structured CLI notice v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["code", "message", "severity"],
+  "properties": {
+    "code": {
+      "enum": [
+        "AXIS_BLANK_ROWS_EXCLUDED",
+        "AXIS_OTHER_GROUPED",
+        "AXIS_TOP_N_ROWS_EXCLUDED",
+        "BLANK_HEADERS_FILLED",
+        "DUPLICATE_HEADERS_RENAMED",
+        "LARGE_INPUT_FILE",
+        "LONG_ROWS_TRUNCATED",
+        "MULTI_VALUE_FULL_COUNT",
+        "NO_ROWS_IN_PERIOD",
+        "PIE_TOP_N_ROWS_EXCLUDED",
+        "SHORT_ROWS_PADDED",
+        "SOURCE_FORMAT_DETECTED",
+        "YEAR_MISSING_ROWS_EXCLUDED"
+      ]
+    },
+    "message": { "type": "string", "minLength": 1 },
+    "severity": { "enum": ["info", "warning"] },
+    "field": { "type": "string", "minLength": 1 },
+    "details": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "count": { "type": "integer", "minimum": 0 },
+        "bytes": { "type": "integer", "minimum": 0 },
+        "format": { "enum": ["CSV", "TSV", "Excel"] },
+        "encoding": { "type": "string" },
+        "delimiter": { "type": "string" }
+      }
+    }
+  }
+}

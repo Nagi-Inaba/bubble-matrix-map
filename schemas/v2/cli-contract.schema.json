@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:bubble-matrix-map:schema:cli-contract:2",
+  "title": "Machine-readable CLI contract v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "ok", "command", "cliVersion", "compatibility", "commands", "streams", "schemas", "exitCodes", "errorCodes", "errorReasons", "capabilities", "unsupported", "reservedOutputFields"],
+  "properties": {
+    "schemaVersion": { "const": 2 },
+    "ok": { "const": true },
+    "command": { "const": "contract" },
+    "cliVersion": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+" },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["activeOutputSchemaVersion", "acceptedSettingsSchemaVersions", "preservedSchemaVersions", "migration"],
+      "properties": {
+        "activeOutputSchemaVersion": { "const": 2 },
+        "acceptedSettingsSchemaVersions": { "const": [1, 2] },
+        "preservedSchemaVersions": { "const": [1] },
+        "migration": { "type": "string", "minLength": 1 }
+      }
+    },
+    "commands": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "description", "arguments"],
+        "properties": {
+          "name": { "enum": ["contract", "inspect", "generate", "help", "version"] },
+          "description": { "type": "string", "minLength": 1 },
+          "arguments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "required", "takesValue", "sensitive", "description"],
+              "properties": {
+                "name": { "type": "string", "minLength": 1 },
+                "required": { "type": "boolean" },
+                "takesValue": { "type": "boolean" },
+                "default": {},
+                "defaultSource": { "enum": ["current_working_directory"] },
+                "sensitive": { "type": "boolean" },
+                "description": { "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "streams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["success", "textSuccess", "failure", "configStdin"],
+      "properties": {
+        "success": { "$ref": "#/$defs/stream" },
+        "textSuccess": { "$ref": "#/$defs/stream" },
+        "failure": { "$ref": "#/$defs/stream" },
+        "configStdin": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["selector", "format", "maxBytes", "precedence", "receiptValue"],
+          "properties": {
+            "selector": { "const": "--config -" },
+            "format": { "const": "JSON object" },
+            "maxBytes": { "const": 1048576 },
+            "precedence": { "type": "string", "minLength": 1 },
+            "receiptValue": { "const": "stdin" }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "type": "array",
+      "minItems": 9,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "role", "path", "uri", "dependsOn"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "role": { "enum": ["input", "output", "shared"] },
+          "path": { "type": "string", "pattern": "^schemas/v2/.+\\.schema\\.json$" },
+          "uri": { "type": "string", "pattern": "^urn:bubble-matrix-map:schema:.+:2$" },
+          "dependsOn": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "type": "string", "pattern": "^urn:bubble-matrix-map:schema:.+:2$" }
+          }
+        }
+      }
+    },
+    "exitCodes": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "meaning"],
+        "properties": {
+          "code": { "type": "integer", "minimum": 0, "maximum": 4 },
+          "meaning": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "errorCodes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "errorReasons": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contractDiscovery", "stdinConfig", "structuredDiagnostics", "localOnly", "deterministicProcessing", "idempotentReuse", "artifactIdentity", "networkAccess"],
+      "properties": {
+        "contractDiscovery": { "const": true },
+        "stdinConfig": { "const": true },
+        "structuredDiagnostics": { "const": true },
+        "localOnly": { "const": true },
+        "deterministicProcessing": { "const": true },
+        "idempotentReuse": { "type": "boolean" },
+        "artifactIdentity": { "type": "boolean" },
+        "networkAccess": { "const": false }
+      }
+    },
+    "unsupported": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "message"],
+        "properties": {
+          "code": { "type": "string", "minLength": 1 },
+          "message": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "reservedOutputFields": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "generateReceipt", "matrixResult"],
+      "properties": {
+        "status": { "enum": ["not-emitted-until-capability-enabled", "emitted"] },
+        "generateReceipt": {
+          "const": ["artifactId", "disposition", "manifest"]
+        },
+        "matrixResult": {
+          "const": ["artifactId"]
+        }
+      }
+    }
+  },
+  "$defs": {
+    "stream": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stream", "format", "commands"],
+      "properties": {
+        "stream": { "enum": ["stdout", "stderr"] },
+        "format": { "enum": ["single-json-line", "text"] },
+        "commands": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["contract", "inspect", "generate", "help", "version"] }
+        }
+      }
+    }
+  }
+}

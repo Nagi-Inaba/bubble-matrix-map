@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:bubble-matrix-map:schema:matrix-settings-effective:1",
+  "title": "Effective Bubble Matrix Map settings",
+  "type": "object",
+  "allOf": [
+    { "$ref": "urn:bubble-matrix-map:schema:matrix-settings:1" }
+  ],
+  "required": [
+    "xAxis",
+    "yAxis",
+    "yearColumn",
+    "xLimit",
+    "yLimit",
+    "pieSourceMode",
+    "pieColumn",
+    "columnSliceStrategy",
+    "pieTopN",
+    "periodStart",
+    "periodEnd",
+    "yearBucketMode",
+    "periodBoundaries",
+    "recentYears",
+    "includeAxisOther",
+    "classificationSplitMode",
+    "xClassificationLevel",
+    "yClassificationLevel",
+    "pieClassificationLevel"
+  ]
+}

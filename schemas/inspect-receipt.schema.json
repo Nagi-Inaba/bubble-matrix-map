@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:bubble-matrix-map:schema:inspect-receipt:1",
+  "title": "Inspect receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "ok", "command", "input", "fileName", "sourceInfo", "rowCount", "columns", "defaultSettings", "diagnostics"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "ok": { "const": true },
+    "command": { "const": "inspect" },
+    "input": { "type": "string" },
+    "fileName": { "type": "string" },
+    "sourceInfo": {
+      "type": ["object", "null"],
+      "properties": {
+        "format": { "enum": ["CSV", "TSV", "Excel"] },
+        "encoding": { "type": "string" },
+        "delimiter": { "type": "string" },
+        "worksheetName": { "type": "string" }
+      },
+      "required": ["format"],
+      "additionalProperties": false
+    },
+    "rowCount": { "type": "integer", "minimum": 0 },
+    "columns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "kind", "nonEmpty", "blankCount", "uniqueCount"],
+        "properties": {
+          "name": { "type": "string" },
+          "kind": { "enum": ["year", "numeric", "text"] },
+          "nonEmpty": { "type": "integer", "minimum": 0 },
+          "blankCount": { "type": "integer", "minimum": 0 },
+          "uniqueCount": { "type": "integer", "minimum": 0 },
+          "samples": { "type": "array", "maxItems": 3, "items": { "type": "string" } }
+        }
+      }
+    },
+    "defaultSettings": { "$ref": "urn:bubble-matrix-map:schema:matrix-settings-effective:1" },
+    "diagnostics": { "type": "array", "items": { "type": "string" } }
+  }
+}

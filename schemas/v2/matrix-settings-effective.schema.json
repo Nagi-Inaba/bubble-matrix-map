@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:bubble-matrix-map:schema:matrix-settings-effective:2",
+  "title": "Effective Bubble Matrix Map settings v2",
+  "type": "object",
+  "allOf": [
+    { "$ref": "urn:bubble-matrix-map:schema:matrix-settings:2" }
+  ],
+  "properties": {
+    "xLimit": { "type": "integer", "minimum": 1, "maximum": 20 },
+    "yLimit": { "type": "integer", "minimum": 1, "maximum": 20 },
+    "pieTopN": { "type": "integer", "minimum": 2, "maximum": 12 },
+    "recentYears": { "type": "integer", "minimum": 2, "maximum": 15 },
+    "showCounts": { "type": "boolean" }
+  },
+  "required": [
+    "xAxis",
+    "yAxis",
+    "yearColumn",
+    "xLimit",
+    "yLimit",
+    "pieSourceMode",
+    "pieColumn",
+    "columnSliceStrategy",
+    "pieTopN",
+    "periodStart",
+    "periodEnd",
+    "yearBucketMode",
+    "periodBoundaries",
+    "recentYears",
+    "includeAxisOther",
+    "showCounts",
+    "classificationSplitMode",
+    "xClassificationLevel",
+    "yClassificationLevel",
+    "pieClassificationLevel"
+  ]
+}

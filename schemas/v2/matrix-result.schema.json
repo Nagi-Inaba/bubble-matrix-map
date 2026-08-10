@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:bubble-matrix-map:schema:matrix-result:2",
+  "title": "Generated matrix result document v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "source", "settings", "matrix"],
+  "properties": {
+    "schemaVersion": { "const": 2 },
+    "artifactId": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "source": {
+      "type": "object",
+      "required": ["input", "fileName", "sourceInfo", "rowCount", "diagnostics"],
+      "properties": {
+        "input": { "type": "string" },
+        "fileName": { "type": "string" },
+        "sourceInfo": {
+          "type": ["object", "null"],
+          "properties": {
+            "format": { "enum": ["CSV", "TSV", "Excel"] },
+            "encoding": { "type": "string" },
+            "delimiter": { "type": "string" },
+            "worksheetName": { "type": "string" }
+          },
+          "required": ["format"],
+          "additionalProperties": false
+        },
+        "rowCount": { "type": "integer", "minimum": 0 },
+        "diagnostics": {
+          "type": "array",
+          "items": { "$ref": "urn:bubble-matrix-map:schema:notice:2" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "settings": { "$ref": "urn:bubble-matrix-map:schema:matrix-settings-effective:2" },
+    "matrix": {
+      "type": "object",
+      "required": ["xCategories", "yCategories", "cells", "topCells", "legend", "totalRows", "scopedRows", "includedRows", "pieExcludedRows", "axisBlankRows", "axisOtherRows", "axisExcludedRows", "maxTotal", "summary", "warnings"],
+      "properties": {
+        "xCategories": { "type": "array", "items": { "type": "string" } },
+        "yCategories": { "type": "array", "items": { "type": "string" } },
+        "cells": { "type": "array", "items": { "$ref": "#/$defs/cell" } },
+        "topCells": { "type": "array", "items": { "$ref": "#/$defs/cell" } },
+        "legend": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["label", "color"],
+            "properties": {
+              "label": { "type": "string" },
+              "color": { "type": "string" }
+            }
+          }
+        },
+        "totalRows": { "type": "integer", "minimum": 0 },
+        "scopedRows": { "type": "integer", "minimum": 0 },
+        "includedRows": { "type": "integer", "minimum": 0 },
+        "pieExcludedRows": { "type": "integer", "minimum": 0 },
+        "axisBlankRows": { "type": "integer", "minimum": 0 },
+        "axisOtherRows": { "type": "integer", "minimum": 0 },
+        "axisExcludedRows": { "type": "integer", "minimum": 0 },
+        "maxTotal": { "type": "integer", "minimum": 0 },
+        "summary": { "type": "string" },
+        "warnings": {
+          "type": "array",
+          "items": { "$ref": "urn:bubble-matrix-map:schema:notice:2" }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "cell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["xLabel", "yLabel", "total", "rowCount", "slices"],
+      "properties": {
+        "xLabel": { "type": "string" },
+        "yLabel": { "type": "string" },
+        "total": { "type": "integer", "minimum": 0 },
+        "rowCount": { "type": "integer", "minimum": 0 },
+        "slices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["label", "value", "share", "color"],
+            "properties": {
+              "label": { "type": "string" },
+              "value": { "type": "integer", "minimum": 0 },
+              "share": { "type": "number", "minimum": 0, "maximum": 1 },
+              "color": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

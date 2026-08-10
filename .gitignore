@@ -1,0 +1,16 @@
+node_modules/
+dist-cli/
+coverage/
+artifacts/
+*.tgz
+*.log
+.env
+.env.*
+data/
+input/
+output/
+*.csv
+*.tsv
+*.xls
+*.xlsx
+!examples/cli-demo.csv

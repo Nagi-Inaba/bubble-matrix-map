@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:bubble-matrix-map:schema:error-receipt:1",
+  "title": "Error receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "ok", "code", "message"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "ok": { "const": false },
+    "code": {
+      "enum": [
+        "DUPLICATE_ARGUMENT",
+        "INPUT_ERROR",
+        "INTERNAL_ERROR",
+        "INVALID_CONFIG",
+        "INVALID_CONFIG_PATH",
+        "INVALID_CONFIG_VALUE",
+        "INVALID_OUTPUT_PATH",
+        "INVALID_RESULT_PATH",
+        "LABEL_TOO_LONG",
+        "MISSING_ARGUMENT",
+        "OUTPUT_ERROR",
+        "OUTPUT_EXISTS",
+        "OUTPUT_OUTSIDE_ROOT",
+        "OUTPUT_PATH_CONFLICT",
+        "SVG_DIMENSION_LIMIT",
+        "UNKNOWN_ARGUMENT",
+        "UNKNOWN_COLUMN",
+        "UNKNOWN_COMMAND",
+        "UNKNOWN_CONFIG_KEY",
+        "UNSAFE_OUTPUT_TARGET",
+        "UNSAFE_XLSX"
+      ]
+    },
+    "message": { "type": "string", "minLength": 1 }
+  }
+}

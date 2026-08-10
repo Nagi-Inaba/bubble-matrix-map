@@ -1,0 +1,10 @@
+{
+  "xAxis": "IPC",
+  "yAxis": "出願人",
+  "yearColumn": "出願年",
+  "pieSourceMode": "column",
+  "pieColumn": "用途",
+  "xLimit": "8",
+  "yLimit": "8",
+  "pieTopN": "5"
+}

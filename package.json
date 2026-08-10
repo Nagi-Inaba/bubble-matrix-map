@@ -1,0 +1,95 @@
+{
+  "name": "bubble-matrix-map",
+  "private": true,
+  "version": "0.1.1",
+  "description": "Local-first CLI for generating bubble matrix maps from CSV, TSV, and Excel files",
+  "author": "Nagi Inaba",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nagi-Inaba/bubble-matrix-map.git"
+  },
+  "homepage": "https://github.com/Nagi-Inaba/bubble-matrix-map#readme",
+  "bugs": {
+    "url": "https://github.com/Nagi-Inaba/bubble-matrix-map/issues"
+  },
+  "keywords": [
+    "matrix-map",
+    "bubble-chart",
+    "csv",
+    "xlsx",
+    "local-first",
+    "cli"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "type": "module",
+  "files": [
+    "bin/",
+    "dist-cli/",
+    "docs/cli.md",
+    "docs/ai-integration.md",
+    "docs/security-model.md",
+    "examples/cli-demo.csv",
+    "examples/matrix-config.example.json",
+    "examples/matrix-config.v2.example.json",
+    "README.md",
+    "VERSION",
+    "CHANGELOG.md",
+    "LICENSE",
+    "NOTICE",
+    "THIRD_PARTY_NOTICES",
+    "licenses/",
+    "schemas/",
+    "SECURITY.md",
+    "SUPPORT.md",
+    "CONTRIBUTING.md"
+  ],
+  "bin": {
+    "bubble-matrix-map": "bin/bubble-matrix-map.mjs"
+  },
+  "scripts": {
+    "build": "npm run typecheck && npm run build:cli",
+    "build:cli": "vite build --config vite.cli.config.ts",
+    "cli": "vite build --config vite.cli.config.ts --logLevel error && node bin/bubble-matrix-map.mjs",
+    "pretest": "npm run build:cli",
+    "test": "vitest --run",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "prepack": "vite build --config vite.cli.config.ts --logLevel error",
+    "smoke:pack": "node scripts/package-smoke.mjs",
+    "audit:dependencies": "npm audit --audit-level=high",
+    "audit:licenses": "node scripts/bundle-license-audit.mjs",
+    "audit:public-tree": "node scripts/public-tree-audit.mjs",
+    "audit:public-copy": "node scripts/public-copy-audit.mjs",
+    "export:public": "node scripts/public-export.mjs",
+    "verify:public-export": "node scripts/verify-public-export.mjs",
+    "verify:clean": "powershell -ExecutionPolicy Bypass -File scripts/clean-room-verify.ps1",
+    "verify": "npm test && npm run typecheck && npm run lint && npm run build && npm run audit:dependencies && npm run audit:licenses && npm run smoke:pack"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.19.21",
+    "@xmldom/xmldom": "^0.9.10",
+    "ajv": "8.20.0",
+    "echarts": "^6.1.0",
+    "exceljs": "4.4.0",
+    "eslint": "^10.3.0",
+    "globals": "^17.6.0",
+    "jszip": "3.10.1",
+    "sharp": "^0.35.3",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.59.2",
+    "vite": "^8.0.12",
+    "vitest": "^4.1.9"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "exceljs": {
+      "archiver": "8.0.0",
+      "unzipper": "0.12.5",
+      "uuid": "11.1.1"
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:bubble-matrix-map:schema:matrix-settings:2",
+  "title": "Bubble Matrix Map settings v2",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "xAxis": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "yAxis": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "yearColumn": { "type": "string", "maxLength": 512 },
+    "pieColumn": { "type": "string", "maxLength": 512 },
+    "xLimit": {
+      "oneOf": [
+        { "type": "integer", "minimum": 1, "maximum": 20 },
+        { "type": "string", "pattern": "^(?:[1-9]|1[0-9]|20)$" }
+      ]
+    },
+    "yLimit": {
+      "oneOf": [
+        { "type": "integer", "minimum": 1, "maximum": 20 },
+        { "type": "string", "pattern": "^(?:[1-9]|1[0-9]|20)$" }
+      ]
+    },
+    "pieTopN": {
+      "oneOf": [
+        { "type": "integer", "minimum": 2, "maximum": 12 },
+        { "type": "string", "pattern": "^(?:[2-9]|1[0-2])$" }
+      ]
+    },
+    "periodStart": { "type": "string", "pattern": "^(?:|(?:19|20)[0-9]{2})$" },
+    "periodEnd": { "type": "string", "pattern": "^(?:|(?:19|20)[0-9]{2})$" },
+    "periodBoundaries": { "type": "string", "maxLength": 128 },
+    "recentYears": {
+      "oneOf": [
+        { "type": "integer", "minimum": 2, "maximum": 15 },
+        { "type": "string", "pattern": "^(?:[2-9]|1[0-5])$" }
+      ]
+    },
+    "includeAxisOther": { "type": "boolean" },
+    "showCounts": { "type": "boolean", "default": false },
+    "pieSourceMode": { "enum": ["column", "year_bucket"] },
+    "columnSliceStrategy": { "enum": ["top_n_with_other", "top_n_only"] },
+    "yearBucketMode": { "enum": ["four_periods", "recent_vs_other"] },
+    "classificationSplitMode": { "enum": ["all", "first"] },
+    "xClassificationLevel": { "enum": ["full", "class", "subclass", "main_group", "subgroup"] },
+    "yClassificationLevel": { "enum": ["full", "class", "subclass", "main_group", "subgroup"] },
+    "pieClassificationLevel": { "enum": ["full", "class", "subclass", "main_group", "subgroup"] }
+  }
+}

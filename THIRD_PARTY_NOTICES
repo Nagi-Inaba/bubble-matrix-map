@@ -1,0 +1,31 @@
+# Third-party notices
+
+## Apache ECharts 6.1.0
+
+Apache ECharts is distributed under Apache License 2.0.
+Its upstream LICENSE and NOTICE are reproduced verbatim in
+`licenses/LICENSE-echarts` and `licenses/NOTICE-echarts`.
+
+Apache ECharts includes selected d3.js components under BSD-3-Clause.
+Their upstream license is reproduced verbatim in `licenses/LICENSE-d3`.
+
+## ExcelJS 4.4.0
+
+ExcelJS is distributed under the MIT License.
+Its upstream license is reproduced verbatim in `licenses/LICENSE-exceljs`.
+ExcelJS and the code it reaches are included in the single-file CLI bundle.
+Their package metadata and license texts are recorded in the generated bundle
+inventory.
+
+## Complete production bundle inventory
+
+The production CLI bundle contains ExcelJS, JSZip, zrender, pako, and supporting
+modules reached through the bundled dependency graph.
+Their exact versions, declared licenses, copyright notices, and available
+license texts are reproduced in `licenses/BUNDLED_NPM_LICENSES.txt`.
+The upstream Saxes 5.0.1 license is also preserved as
+`licenses/LICENSE-saxes` because that npm package omits its standalone license
+file.
+
+The inventory is generated from the production Vite bundle source map and is
+verified by `npm run audit:licenses`.
