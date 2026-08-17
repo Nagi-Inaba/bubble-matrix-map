@@ -71,7 +71,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^22.19.21",
-    "@xmldom/xmldom": "^0.9.10",
+    "@xmldom/xmldom": "^0.9.11",
     "ajv": "8.20.0",
     "echarts": "^6.1.0",
     "exceljs": "4.4.0",
