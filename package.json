@@ -70,7 +70,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/node": "^22.19.21",
+    "@types/node": "^26.2.0",
     "@xmldom/xmldom": "^0.9.10",
     "ajv": "8.20.0",
     "echarts": "^6.1.0",
