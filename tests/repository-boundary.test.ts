@@ -59,7 +59,9 @@ describe('repository boundary', () => {
     expect(packageDocument.dependencies ?? {}).not.toHaveProperty('exceljs')
     expect(packageDocument.devDependencies?.exceljs).toBe('4.4.0')
     expect(packageDocument.overrides).toEqual({
-      'brace-expansion': '5.0.9',
+      'brace-expansion': '5.0.12',
+      'fast-uri': '3.1.9',
+      'source-map-js': '1.2.2',
       exceljs: {
         archiver: '8.0.0',
         unzipper: '0.12.5',
