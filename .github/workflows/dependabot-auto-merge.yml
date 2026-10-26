@@ -1,0 +1,79 @@
+# Enables GitHub auto-merge for Dependabot patch and minor updates.
+# pull_request_target runs this file from the default branch, which is what
+# gives the workflow a token that can enable auto-merge. The jobs never
+# check out pull request code and never run it. GitHub merges only after the
+# required status checks on the base branch pass.
+name: dependabot-auto-merge
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions: {}
+
+concurrency:
+  group: dependabot-auto-merge-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  auto-merge:
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: ${{ github.token }}
+
+      - name: Enable squash auto-merge for patch and minor updates
+        if: steps.metadata.outputs['update-type'] == 'version-update:semver-patch' || steps.metadata.outputs['update-type'] == 'version-update:semver-minor'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          UPDATE_TYPE: ${{ steps.metadata.outputs['update-type'] }}
+        run: |
+          set -euo pipefail
+          echo "Enabling squash auto-merge for ${UPDATE_TYPE}."
+          gh pr merge --auto --squash "$PR_URL"
+
+      - name: Record updates that are not auto-merged
+        if: steps.metadata.outputs['update-type'] != 'version-update:semver-patch' && steps.metadata.outputs['update-type'] != 'version-update:semver-minor'
+        env:
+          UPDATE_TYPE: ${{ steps.metadata.outputs['update-type'] }}
+        run: |
+          set -euo pipefail
+          echo "Not enabling auto-merge for update-type=${UPDATE_TYPE}."
+
+  label-major:
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: ${{ github.token }}
+
+      - name: Label major updates
+        if: steps.metadata.outputs['update-type'] == 'version-update:semver-major'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          set -euo pipefail
+          gh label create "needs-review" \
+            --color B60205 \
+            --description "Dependabot major update requires a human review" \
+            || true
+          gh pr edit "$PR_URL" --add-label "needs-review"
+          echo "Labeled major update needs-review. Auto-merge was not enabled."

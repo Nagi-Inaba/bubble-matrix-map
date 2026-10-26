@@ -1,0 +1,242 @@
+# Weekly review of Dependabot pull requests that are major updates or have
+# failing checks. schedule and workflow_dispatch run this file from the
+# default branch. The review job reads the diff as text and does not check
+# out pull request code. A later job posts a pull request review with event
+# COMMENT. It does not approve, merge, or close.
+name: dependabot-weekly-review
+
+on:
+  schedule:
+    # 09:00 Monday Asia/Tokyo (00:00 UTC). Japan does not observe daylight saving time.
+    - cron: "0 0 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: dependabot-weekly-review
+  cancel-in-progress: false
+
+jobs:
+  select:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      checks: read
+      contents: read
+      pull-requests: read
+    outputs:
+      skip: ${{ steps.gate.outputs.skip }}
+      prs: ${{ steps.select.outputs.prs || steps.gate.outputs.prs }}
+    steps:
+      - name: Skip when OPENAI_API_KEY is missing
+        id: gate
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${OPENAI_API_KEY}" ]; then
+            echo "OPENAI_API_KEY is not set. Skipping the weekly dependabot review."
+            echo "Add an Actions repository secret named OPENAI_API_KEY to enable this workflow."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "prs=[]" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "prs=[]" >> "$GITHUB_OUTPUT"
+
+      - name: Check out the default branch
+        if: steps.gate.outputs.skip == 'false'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Select Dependabot pull requests that need review
+        id: select
+        if: steps.gate.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh pr list \
+            --author "dependabot[bot]" \
+            --state open \
+            --limit 50 \
+            --json number,title,body,url,state,statusCheckRollup \
+            > pulls.json
+          node .github/scripts/select-dependabot-reviews.mjs < pulls.json > selected.json
+          count="$(jq length selected.json)"
+          echo "Review targets: ${count}"
+          if [ "$count" -eq 0 ]; then
+            echo "No open dependabot pull requests need review."
+          fi
+          delimiter="GHA_PRS_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}"
+          {
+            echo "prs<<${delimiter}"
+            cat selected.json
+            echo "${delimiter}"
+          } >> "$GITHUB_OUTPUT"
+
+  review:
+    needs: select
+    if: needs.select.outputs.skip == 'false' && needs.select.outputs.prs != '[]' && needs.select.outputs.prs != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      actions: write
+      checks: read
+      contents: read
+      pull-requests: read
+    strategy:
+      fail-fast: false
+      matrix:
+        pr: ${{ fromJson(needs.select.outputs.prs) }}
+    steps:
+      - name: Check out the default branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Collect pull request diff, changelog, and CI status
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ matrix.pr.number }}
+          PR_REASONS: ${{ matrix.pr.reasons }}
+          PR_UPDATE_TYPE: ${{ matrix.pr.updateType }}
+        run: |
+          set -euo pipefail
+          if ! [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
+            echo "Refusing to review because the pull request number is invalid." >&2
+            exit 1
+          fi
+          mkdir -p review-input
+          gh pr view "$PR_NUMBER" --json title,body,url,files,commits > review-input/pr.json
+          jq -r '.body // ""' review-input/pr.json > review-input/changelog.md
+          gh pr diff "$PR_NUMBER" > review-input/diff.patch
+          checks_status=0
+          gh pr checks "$PR_NUMBER" > review-input/checks.txt 2>&1 || checks_status=$?
+          if [ "$checks_status" -ne 0 ] && [ "$checks_status" -ne 1 ] && [ "$checks_status" -ne 8 ]; then
+            echo "Unable to read CI status for pull request #${PR_NUMBER}." >&2
+            exit "$checks_status"
+          fi
+          jq -n \
+            --argjson number "$PR_NUMBER" \
+            --arg updateType "$PR_UPDATE_TYPE" \
+            --arg reasons "$PR_REASONS" \
+            --slurpfile pr review-input/pr.json \
+            '{number:$number, title:$pr[0].title, url:$pr[0].url, updateType:$updateType, reasons:$reasons}' \
+            > review-input/context.json
+          cp review-input/context.json review-meta.json
+
+      # Read-only profile plus drop-sudo. The upload step only publishes the
+      # review text; the comment job is the only job allowed to write a review.
+      - name: Review with codex-action
+        uses: openai/codex-action@bdf19a4a223ec2549a3e2274a0cf61556bc07675 # v1.13
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          prompt-file: .github/prompts/dependabot-review.md
+          permission-profile: ":read-only"
+          safety-strategy: drop-sudo
+          allow-bots: true
+          output-file: codex-review.md
+
+      - name: Check review text
+        id: review_text
+        env:
+          PR_NUMBER: ${{ matrix.pr.number }}
+        run: |
+          set -euo pipefail
+          if [ ! -s codex-review.md ]; then
+            echo "codex-action returned an empty review for pull request #${PR_NUMBER}. No comment will be posted."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "present=true" >> "$GITHUB_OUTPUT"
+
+      - name: Upload review text
+        if: steps.review_text.outputs.present == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dependabot-review-${{ matrix.pr.number }}
+          path: |
+            codex-review.md
+            review-meta.json
+          if-no-files-found: error
+
+  comment:
+    needs: [select, review]
+    if: always() && needs.select.result == 'success' && needs.select.outputs.skip == 'false' && (needs.review.result == 'success' || needs.review.result == 'failure')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      pull-requests: write
+    steps:
+      - name: Download review text
+        id: download
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: dependabot-review-*
+          path: reviews
+
+      - name: Post COMMENT reviews
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [ ! -d reviews ]; then
+            echo "No review artifacts were downloaded."
+            exit 0
+          fi
+          mapfile -d '' metas < <(find reviews -type f -name review-meta.json -print0 | sort -z)
+          if [ "${#metas[@]}" -eq 0 ]; then
+            echo "No review artifacts were downloaded."
+            exit 0
+          fi
+          posted=0
+          for meta in "${metas[@]}"; do
+            dir="$(dirname "$meta")"
+            review="${dir}/codex-review.md"
+            number="$(jq -r '.number' "$meta")"
+            if ! [[ "$number" =~ ^[0-9]+$ ]]; then
+              echo "Refusing to comment because the pull request number is invalid." >&2
+              exit 1
+            fi
+            if [ ! -s "$review" ]; then
+              echo "No review text for pull request #${number}. Skipping comment."
+              continue
+            fi
+            jq -n \
+              --rawfile review "$review" \
+              --slurpfile meta "$meta" \
+              '
+                $meta[0] as $info
+                | ($review | gsub("\r"; "") | .[0:50000]) as $text
+                | {
+                    event: "COMMENT",
+                    body: (
+                      [
+                        "## Dependabot review",
+                        "",
+                        "This automated review is a comment only. It does not approve, merge, or close the pull request.",
+                        "",
+                        "- Pull request: #\($info.number)",
+                        "- Update type: \($info.updateType)",
+                        "- Reasons: \($info.reasons)",
+                        "",
+                        "---",
+                        "",
+                        $text
+                      ] | join("\n")
+                    )
+                  }
+              ' > "${dir}/payload.json"
+            gh api \
+              --method POST \
+              "repos/${GITHUB_REPOSITORY}/pulls/${number}/reviews" \
+              --input "${dir}/payload.json"
+            echo "Posted a COMMENT review on pull request #${number}."
+            posted=$((posted + 1))
+          done
+          echo "Posted ${posted} COMMENT review(s)."
