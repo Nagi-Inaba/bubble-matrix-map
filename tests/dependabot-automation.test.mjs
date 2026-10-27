@@ -112,6 +112,7 @@ describe('dependabot workflows', () => {
     expect(workflow).toContain("version-update:semver-minor")
     expect(workflow).toContain("version-update:semver-major")
     expect(workflow).toContain('--add-label "needs-review"')
+    expect(workflow).toContain('GH_REPO: ${{ github.repository }}')
     expect(workflow).not.toContain('actions/checkout')
     expect(workflow).not.toContain('--approve')
     expect(workflow).not.toContain('github.event.pull_request.head.sha')
