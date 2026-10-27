@@ -131,6 +131,8 @@ describe('dependabot workflows', () => {
     expect(workflow).toContain('allow-bots: true')
     expect(workflow).toContain('persist-credentials: false')
     expect(workflow).toMatch(/uses: openai\/codex-action@[a-f0-9]{40} # v1\.13/)
+    expect(workflow).toContain('model: gpt-6.1-sol')
+    expect(workflow).toContain('effort: high')
     expect(workflow).toContain('event: "COMMENT"')
     expect(workflow).not.toContain('pr merge')
     expect(workflow).not.toContain('--approve')
