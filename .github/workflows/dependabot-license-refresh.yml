@@ -1,0 +1,60 @@
+# Refreshes the bundled license inventory after Dependabot npm updates.
+# Uses pull_request because it executes PR code; pull_request_target would run
+# that code in the privileged base-branch context.
+# Pushes made with GITHUB_TOKEN do not trigger other workflows.
+name: dependabot-license-refresh
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - package.json
+      - package-lock.json
+
+permissions: {}
+
+concurrency:
+  group: dependabot-license-refresh-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    if: >-
+      github.actor == 'dependabot[bot]' &&
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run audit:licenses -- --write
+      - name: Commit and push the license inventory
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain -- licenses/BUNDLED_NPM_LICENSES.txt)" ]; then
+            echo "Bundled license inventory is unchanged."
+            exit 0
+          fi
+          if ! git diff --quiet -- . ':!licenses/BUNDLED_NPM_LICENSES.txt' ||
+             ! git diff --cached --quiet -- . ':!licenses/BUNDLED_NPM_LICENSES.txt'; then
+            echo "Refusing to commit changes outside the bundled license inventory." >&2
+            exit 1
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add licenses/BUNDLED_NPM_LICENSES.txt
+          git commit -m "chore: refresh bundled license inventory"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/${PR_HEAD_REF}"
